@@ -1,12 +1,27 @@
 import pandas as pd
+import joblib
+from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score
+BASE_DIR = Path(__file__).resolve().parents[2]
 
-df=pd.read_csv("C:/Users/omvan/OneDrive/Desktop/FitML/DataSet/calorie_health/healthy_diet_calorie_intake.csv")
+DATA_PATH = (
+    BASE_DIR
+    / "ml"
+    / "data"
+    / "calorie_health"
+    / "healthy_diet_calorie_intake.csv"
+)
+
+MODEL_DIR = BASE_DIR / "ml" / "saved_models"
+
+MODEL_PATH = MODEL_DIR / "calorie_model.pkl"
+
+df=pd.read_csv(DATA_PATH)
 features=[
     "Age",
     "Gender",
@@ -40,7 +55,7 @@ preprocessor = ColumnTransformer(
 )
 model=Pipeline(
     steps=[
-        ("preprocessser",preprocessor),
+        ("preprocesser",preprocessor),
         ("regressor",LinearRegression())
     ]
 )
@@ -166,3 +181,19 @@ print("\nRandom Forest WITH BMI:")
 print("MAE :", round(forest_bmi_mae, 2))
 print("RMSE:", round(forest_bmi_rmse, 2))
 print("R²  :", round(forest_bmi_r2, 4))
+print("\n===================================")
+print("FINAL MODEL: RANDOM FOREST")
+print("BMI excluded because it did not improve performance.")
+print("===================================")
+MODEL_DIR.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
+joblib.dump(
+    forest_model,
+    MODEL_PATH
+)
+
+print("\nFinal model saved successfully!")
+print("Model location:", MODEL_PATH)
